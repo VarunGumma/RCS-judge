@@ -106,7 +106,8 @@ public class Checker
 
                         //begin the sub-process;
                         //first compile it;
-                        Process compiler = new ProcessBuilder().command("bash", "-c", ("gcc -lm " + args[1])).start();
+                        String compileCmd = ((args[1].charAt(args[1].length() - 1) == 'c') ? "gcc -lm " : "g++ -std=c++17 ");
+                        Process compiler = new ProcessBuilder().command("bash", "-c", (compileCmd + args[1])).start();
                         compiler.waitFor();
                         if(compiler.exitValue() != 0)
                             Checker.exitWithMessage("\033[1;" + 31 + "m" + "Compilation Error!\n" + "\033[0m");
