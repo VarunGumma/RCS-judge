@@ -83,10 +83,12 @@ public class Checker
                         Checker.out = new ArrayList<String>();
                         Checker.ans = new ArrayList<String>();
 
+                        BufferedReader bfri = null;
+                        BufferedReader bfra = null;
                         try
                         {
-                        	BufferedReader bfri = new BufferedReader(new FileReader("test_files/t" + i + ".txt"));
-                        	BufferedReader bfra = new BufferedReader(new FileReader("test_files/t" + i + "_o.txt"));
+                        	bfri = new BufferedReader(new FileReader("test_files/t" + i + ".txt"));
+                        	bfra = new BufferedReader(new FileReader("test_files/t" + i + "_o.txt"));
                     	}
                     	catch(IOException ie)
                     	{
