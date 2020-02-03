@@ -44,7 +44,7 @@ public class Checker
     }
 
     //main function:
-    public static void main (String[] args) throws IOException, InterruptedException
+    public static void main (String[] args) throws IOException
     {
         int score = 0, no_of_testcases = 0;
         System.out.print("\nEnter Password: ");
@@ -144,7 +144,15 @@ public class Checker
                                     Checker.out.add(st.trim());
 
                             //give the subprocess 250 ms buffer time to wrap up;
-                            Thread.sleep(250);
+                            try
+                            {
+                                Thread.sleep(250);
+                            }
+                            catch(InterruptedException ie)
+                            {
+                                //don't report anything;
+                            }
+                            
                             //if process has already ended but killer is still running;
                             //interrupt the killer thread;
                             if(!p.isAlive())
@@ -163,8 +171,16 @@ public class Checker
                         finally 
                         {
                             //join running threads;
-                            if(!timer.isInterrupted())
-                                timer.join();
+                            try
+                            {
+                                if(!timer.isInterrupted())
+                                    timer.join();
+                            }
+                            catch(InterruptedException ie)
+                            {
+                                //don't report anything;
+                            }
+                            
                             //close all streams;
                             bfri.close();
                             bfra.close();
