@@ -46,20 +46,11 @@ public class Checker
     //main function:
     public static void main (String[] args) throws IOException
     {
-        int score = 0, no_of_testcases = 0;
+        int score = 0, no_of_testcases = 3;
         System.out.print("\nEnter Password: ");
         //invoke a console object's readPassword method to read the password for the judge;
         //the password in this case will not be visible;
         String inp_pass = new String(System.console().readPassword());
-        
-        try
-        {
-            no_of_testcases = (new File("test_files").listFiles().length >> 1);
-        }
-        catch(NullPointerException npe)
-        {
-            Checker.exitWithMessage("No input files found. Please copy test_files");
-        }
 
         //display error message if the number of arguments are not adequate;
         if(args.length < 1 || args.length > 2)
@@ -74,14 +65,15 @@ public class Checker
                         Checker.exitWithMessage("Missing source code filename. Format: judge xxx");
                     
                     ArrayList<TestCase> pack = new ArrayList<TestCase>();
-                    //keep a verdict map to have a track of the colored output along with a verdict digit [0-2] for simplicity;
+                    //keep a verdict map to have a track of the color-coded output along with a verdict digit [0-2] for simplicity;
                     Checker.verdictMap = new HashMap<>();
                     Checker.verdictMap.put(0, ("\033[1;" + 31 + "m" + "Wrong Answer        " + "\033[0m"));
                     Checker.verdictMap.put(3, ("\033[1;" + 31 + "m" + "Runtime Error       " + "\033[0m"));
                     Checker.verdictMap.put(1, ("\033[1;" + 32 + "m" + "Accepted            " + "\033[0m"));
                     Checker.verdictMap.put(2, ("\033[1;" + 33 + "m" + "Time Limit Exceeded " + "\033[0m"));
 
-                    for (int i = 1; i <= no_of_testcases; i++) {
+                    for (int i = 1; i <= no_of_testcases; i++) 
+                    {
                         String st;
                         //initialize variables for TestCase class;
                         //verdict -1 indicates that current testcase is still under judgement;
@@ -91,8 +83,15 @@ public class Checker
                         Checker.out = new ArrayList<String>();
                         Checker.ans = new ArrayList<String>();
 
-                        BufferedReader bfri = new BufferedReader(new FileReader("test_files/t" + i + ".txt"));
-                        BufferedReader bfra = new BufferedReader(new FileReader("test_files/t" + i + "_o.txt"));
+                        try
+                        {
+                        	BufferedReader bfri = new BufferedReader(new FileReader("test_files/t" + i + ".txt"));
+                        	BufferedReader bfra = new BufferedReader(new FileReader("test_files/t" + i + "_o.txt"));
+                    	}
+                    	catch(IOException ie)
+                    	{
+                    		Checker.exitWithMessage("Unable to read necessary files");
+                    	}
                         //fetch input for the given problem;
                         //don't include any stray newlines or spaces;
                         while ((st = bfri.readLine()) != null)
@@ -212,6 +211,8 @@ public class Checker
                         TestCase test = new TestCase(i, Checker.verdictMap.get(Checker.verdict), Checker.log, Checker.inp, Checker.out, Checker.ans);
                         test.showResult();
                         pack.add(test);
+                        if(compiler.isAlive())
+                        	compiler.destroyForcibly();
                         System.gc();
                     }
                     //dump all testcases into a file for future reference;
