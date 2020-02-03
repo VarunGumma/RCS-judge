@@ -108,7 +108,15 @@ public class Checker
                         //first compile it;
                         String compileCmd = ((args[1].charAt(args[1].length() - 1) == 'c') ? "gcc -lm " : "g++ -std=c++17 ");
                         Process compiler = new ProcessBuilder().command("bash", "-c", (compileCmd + args[1])).start();
-                        compiler.waitFor();
+                        try
+                        {
+                        	compiler.waitFor();
+                    	}
+                    	catch(InterruptedException ie)
+                    	{
+                    		ie.printStackTrace();
+                    	}
+                        
                         if(compiler.exitValue() != 0)
                             Checker.exitWithMessage("\033[1;" + 31 + "m" + "Compilation Error!\n" + "\033[0m");
                         //if compilation is successful, run it;
@@ -144,15 +152,7 @@ public class Checker
                                     Checker.out.add(st.trim());
 
                             //give the subprocess 250 ms buffer time to wrap up;
-                            try
-                            {
-                                Thread.sleep(250);
-                            }
-                            catch(InterruptedException ie)
-                            {
-                                //don't report anything;
-                            }
-                            
+                            Thread.sleep(250);
                             //if process has already ended but killer is still running;
                             //interrupt the killer thread;
                             if(!p.isAlive())
@@ -166,7 +166,7 @@ public class Checker
                         } 
                         catch (InterruptedException inte) 
                         {
-                            inte.printStackTrace();
+                            //don't report anything;
                         } 
                         finally 
                         {
