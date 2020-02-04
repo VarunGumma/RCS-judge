@@ -87,13 +87,13 @@ public class Checker
                         BufferedReader bfra = null;
                         try
                         {
-                        	bfri = new BufferedReader(new FileReader("test_files/t" + i + ".txt"));
-                        	bfra = new BufferedReader(new FileReader("test_files/t" + i + "_o.txt"));
-                    	}
-                    	catch(IOException ie)
-                    	{
-                    		Checker.exitWithMessage("Unable to read necessary files");
-                    	}
+                        		bfri = new BufferedReader(new FileReader("test_files/t" + i + ".txt"));
+                        		bfra = new BufferedReader(new FileReader("test_files/t" + i + "_o.txt"));
+                        }
+                        catch(IOException ie)
+                        {
+                        		Checker.exitWithMessage("Unable to read necessary files");
+                        }
                         //fetch input for the given problem;
                         //don't include any stray newlines or spaces;
                         while ((st = bfri.readLine()) != null)
@@ -111,12 +111,12 @@ public class Checker
                         Process compiler = new ProcessBuilder().command("bash", "-c", (compileCmd + args[1])).start();
                         try
                         {
-                        	compiler.waitFor();
-                    	}
-                    	catch(InterruptedException ie)
-                    	{
-                    		ie.printStackTrace();
-                    	}
+                        		compiler.waitFor();
+                        }
+                        catch(InterruptedException ie)
+                        {
+                    		//don't print anything;
+                        }
                         
                         if(compiler.exitValue() != 0)
                             Checker.exitWithMessage("\033[1;" + 31 + "m" + "Compilation Error!\n" + "\033[0m");
@@ -153,7 +153,7 @@ public class Checker
                                     Checker.out.add(st.trim());
 
                             //give the subprocess 250 ms buffer time to wrap up;
-                            Thread.sleep(250);
+                            Thread.sleep(314);
                             //if process has already ended but killer is still running;
                             //interrupt the killer thread;
                             if(!p.isAlive())

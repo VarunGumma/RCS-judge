@@ -15,7 +15,7 @@ public class TimerThread extends Thread
         try
         {
             Thread.sleep(time_limit);
-            if(process.isAlive())
+            if(process.isAlive() && !Thread.currentThread().isInterrupted())
             {
                 process.destroyForcibly();
                 Checker.verdict = 2;
@@ -24,6 +24,7 @@ public class TimerThread extends Thread
         catch(InterruptedException inte)
         {
             //don't do anything;
+            return;
         }
     }
 }
