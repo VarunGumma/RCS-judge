@@ -6,7 +6,7 @@ int main()
 	int* p = NULL;
 	scanf("%d", &n);
 	for(int i = 0; i < n; i++)
-		scanf("%d", &t), ans += t;
+		scanf("%d", &t), ans += t
 	printf("%d\n", ans);
 	return 0;
 }

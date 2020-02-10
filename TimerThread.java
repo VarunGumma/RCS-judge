@@ -1,4 +1,4 @@
-public class TimerThread extends Thread 
+public class TimerThread extends Thread
 {
     private final Process process;
     private final int time_limit;

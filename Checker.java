@@ -20,7 +20,7 @@ public class Checker
         int os = Checker.out.size();
         int as = Checker.ans.size();
         //full answer is not found;
-        //else a full answer is found, but there is a mismatch; 
+        //else a full answer is found, but there is a mismatch;
         //report first mismatch instance;
         if(os == 0)
             Checker.log = "<no output>";
@@ -58,12 +58,12 @@ public class Checker
 
         //verify the password;
         if(inp_pass.equals(Checker.pass))
-            switch (args[0]) 
+            switch (args[0])
             {
                 case "judge":
                     if(args.length < 2)
                         Checker.exitWithMessage("Missing source code filename. Format: judge xxx");
-                    
+
                     ArrayList<TestCase> pack = new ArrayList<TestCase>();
                     //keep a verdict map to have a track of the color-coded output along with a verdict digit [0-2] for simplicity;
                     Checker.verdictMap = new HashMap<>();
@@ -72,7 +72,7 @@ public class Checker
                     Checker.verdictMap.put(1, ("\033[1;" + 32 + "m" + "Accepted            " + "\033[0m"));
                     Checker.verdictMap.put(2, ("\033[1;" + 33 + "m" + "Time Limit Exceeded " + "\033[0m"));
 
-                    for (int i = 1; i <= no_of_testcases; i++) 
+                    for (int i = 1; i <= no_of_testcases; i++)
                     {
                         String st;
                         //initialize variables for TestCase class;
@@ -107,26 +107,28 @@ public class Checker
 
                         //begin the sub-process;
                         //first compile it;
-                        String compileCmd = ((args[1].charAt(args[1].length() - 1) == 'c') ? "gcc -lm " : "g++ -std=c++17 ");
-                        Process compiler = new ProcessBuilder().command("bash", "-c", (compileCmd + args[1])).start();
+                        String compileCmd = (((args[1].charAt(args[1].length() - 1) == 'c') ? "gcc -lm " : "g++ -std=c++17 ") + args[1]);
+                        String params[] = {"bash", "-c", compileCmd};
+                        Process compiler = Runtime.getRuntime().exec(params);
                         try
                         {
                         		compiler.waitFor();
                         }
                         catch(InterruptedException ie)
                         {
-                    		//don't print anything;
+                    		    //don't print anything;
                         }
-                        
+
                         if(compiler.exitValue() != 0)
                             Checker.exitWithMessage("\033[1;" + 31 + "m" + "Compilation Error!\n" + "\033[0m");
+
                         //if compilation is successful, run it;
                         Process p = null;
                         try
                         {
                             p = new ProcessBuilder().command("./a.out").start();
-                        } 
-                        catch (IOException ie) 
+                        }
+                        catch (IOException ie)
                         {
                             Checker.exitWithMessage("No executable found. Compile the source code first.");
                         }
@@ -138,10 +140,10 @@ public class Checker
                         //this constructor internally calls start;
                         TimerThread timer = new TimerThread(p, 2500);
 
-                        try 
+                        try
                         {
                             //provide input to the subprocess;
-                            for (String s : Checker.inp) 
+                            for (String s : Checker.inp)
                             {
                                 pw.println(s);
                                 pw.flush();
@@ -158,18 +160,18 @@ public class Checker
                             //interrupt the killer thread;
                             if(!p.isAlive())
                                 timer.interrupt();
-                        } 
-                        catch (IOException ie) 
+                        }
+                        catch (IOException ie)
                         {
                             //if the process has been killer externally meanwhile, an exception is generated;
                             //generated exception indicates an TLE;
                             Checker.verdict = 2;
-                        } 
-                        catch (InterruptedException inte) 
+                        }
+                        catch (InterruptedException inte)
                         {
                             //don't report anything;
-                        } 
-                        finally 
+                        }
+                        finally
                         {
                             //join running threads;
                             try
@@ -181,13 +183,13 @@ public class Checker
                             {
                                 //don't report anything;
                             }
-                            
+
                             //close all streams;
                             bfri.close();
                             bfra.close();
                             bfro.close();
                         }
-                        
+
                         //verify output;
                         //if already TLE has occured, set log as "TLE";
                         //else check the output;
@@ -206,7 +208,7 @@ public class Checker
                                 Checker.verdict = (Checker.log.equals("Ok") ? 1 : 0);
                             }
                         }
-                
+
                         if (Checker.verdict == 1)
                             score++;
                         //save the testcase;
@@ -225,37 +227,37 @@ public class Checker
                     System.out.println("\n\t\t        +----------------+");
                     System.out.print("\t\t\t| Final Score: " + score + " |");
                     System.out.println("\n\t\t        +----------------+");
-                    if (score == no_of_testcases) 
+                    if (score == no_of_testcases)
                     {
                         System.out.print("\t\t\t|\033[1;" + 32 + "m" + "   WELL DONE!" + "\033[0m   |");
                         System.out.println("\n\t\t        +----------------+\n");
-                    } 
+                    }
                     else
                         System.out.print("\n");
                     break;
-                
+
                 case "reveal":
                     //to reveal a particular testcase;
                     if(args.length < 2)
                         Checker.exitWithMessage("Missing testcase no. Format: reveal X");
                     int idx = Integer.parseInt(args[1]);
-                    try 
+                    try
                     {
                         ObjectInputStream ois = new ObjectInputStream(new FileInputStream("Results.dat"));
                         pack = (ArrayList<TestCase>) ois.readObject();
                         System.out.println(pack.get(idx - 1));
                         ois.close();
-                    } 
-                    catch (FileNotFoundException fnfe) 
+                    }
+                    catch (FileNotFoundException fnfe)
                     {
                         System.out.println("Judge atleast once before revealing");
-                    } 
-                    catch (IOException | ClassNotFoundException | ClassCastException ge) 
+                    }
+                    catch (IOException | ClassNotFoundException | ClassCastException ge)
                     {
                         ge.printStackTrace();
                     }
                     break;
-                
+
                 case "clean":
                     //clean all files related to judge and the coder's executable file;
                     String[] cmd = {"rm Results.dat", "rm -rf test_files", "rm RCS.jar", "rm a.out"};
