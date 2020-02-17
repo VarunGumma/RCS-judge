@@ -1,6 +1,8 @@
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class Checker
 {
@@ -212,7 +214,14 @@ public class Checker
                         if (Checker.verdict == 1)
                             score++;
                         //save the testcase;
-                        TestCase test = new TestCase(i, Checker.verdictMap.get(Checker.verdict), Checker.log, Checker.inp, Checker.out, Checker.ans);
+                        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+                        String currTime = dtf.format(LocalDateTime.now());
+                        TestCase test = new TestCase(i, Checker.verdictMap.get(Checker.verdict),
+                                                     Checker.log,
+                                                     Checker.inp,
+                                                     Checker.out,
+                                                     Checker.ans,
+                                                     currTime);
                         test.showResult();
                         pack.add(test);
                         if(compiler.isAlive())

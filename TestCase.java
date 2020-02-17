@@ -9,9 +9,10 @@ public class TestCase implements Serializable
     private final ArrayList<String> inp;
     private final ArrayList<String> out;
     private final ArrayList<String> ans;
+    private final String time;
     private static final long serialVersionUID = 1L;
 
-    TestCase(int testNo, String verdict, String log, ArrayList<String> inp, ArrayList<String> out, ArrayList<String> ans)
+    TestCase(int testNo, String verdict, String log, ArrayList<String> inp, ArrayList<String> out, ArrayList<String> ans, String time)
     {
         this.inp = inp;
         this.out = out;
@@ -19,6 +20,7 @@ public class TestCase implements Serializable
         this.log = log;
         this.testNo = testNo;
         this.verdict = verdict;
+        this.time = time;
     }
 
     void showResult()
@@ -35,6 +37,7 @@ public class TestCase implements Serializable
         StringBuilder finalAns = new StringBuilder("\n");
         finalAns.append("---------------------------------------------------------------\n");
         finalAns.append("TESTCASE: ").append(this.testNo).append("\n");
+        finalAns.append("JUDGED AT: ").append(this.time).append("\n");
         finalAns.append("VERDICT: ").append(this.verdict).append("\n");
 
         finalAns.append("\nINPUT:\n");
