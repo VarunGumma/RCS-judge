@@ -1,6 +1,8 @@
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.time.Instant;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -69,10 +71,10 @@ public class Checker
                     ArrayList<TestCase> pack = new ArrayList<TestCase>();
                     //keep a verdict map to have a track of the color-coded output along with a verdict digit [0-2] for simplicity;
                     Checker.verdictMap = new HashMap<>();
-                    Checker.verdictMap.put(0, ("\033[1;" + 31 + "m" + "Wrong Answer        " + "\033[0m"));
-                    Checker.verdictMap.put(3, ("\033[1;" + 31 + "m" + "Runtime Error       " + "\033[0m"));
-                    Checker.verdictMap.put(1, ("\033[1;" + 32 + "m" + "Accepted            " + "\033[0m"));
-                    Checker.verdictMap.put(2, ("\033[1;" + 33 + "m" + "Time Limit Exceeded " + "\033[0m"));
+                    Checker.verdictMap.put(0, ("\033[1;" + 31 + "m" + "Wrong Answer       " + "\033[0m"));
+                    Checker.verdictMap.put(3, ("\033[1;" + 31 + "m" + "Runtime Error      " + "\033[0m"));
+                    Checker.verdictMap.put(1, ("\033[1;" + 32 + "m" + "Accepted           " + "\033[0m"));
+                    Checker.verdictMap.put(2, ("\033[1;" + 33 + "m" + "Time Limit Exceeded" + "\033[0m"));
 
                     for (int i = 1; i <= no_of_testcases; i++)
                     {
@@ -125,10 +127,12 @@ public class Checker
                             Checker.exitWithMessage("\033[1;" + 31 + "m" + "Compilation Error!\n" + "\033[0m");
 
                         //if compilation is successful, run it;
+                        Instant start = null, end = null;
                         Process p = null;
                         try
                         {
                             p = new ProcessBuilder().command("./a.out").start();
+                            start = Instant.now();
                         }
                         catch (IOException ie)
                         {
@@ -156,12 +160,14 @@ public class Checker
                                 if (st.trim().length() > 0)
                                     Checker.out.add(st.trim());
 
-                            //give the subprocess 250 ms buffer time to wrap up;
-                            Thread.sleep(314);
                             //if process has already ended but killer is still running;
                             //interrupt the killer thread;
-                            if(!p.isAlive())
+                            while(p.isAlive())
+                            {
+                            	//but first allow the process to wrap up;
                                 timer.interrupt();
+                                end = Instant.now();
+                            }
                         }
                         catch (IOException ie)
                         {
@@ -169,17 +175,16 @@ public class Checker
                             //generated exception indicates an TLE;
                             Checker.verdict = 2;
                         }
-                        catch (InterruptedException inte)
-                        {
-                            //don't report anything;
-                        }
                         finally
                         {
                             //join running threads;
                             try
                             {
                                 if(!timer.isInterrupted())
+                                {
                                     timer.join();
+                                    end = Instant.now();
+                                }
                             }
                             catch(InterruptedException ie)
                             {
@@ -214,9 +219,11 @@ public class Checker
                         if (Checker.verdict == 1)
                             score++;
                         //save the testcase;
+                        long timeElapsed = Duration.between(start, end).toNanos();
                         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
                         String currTime = dtf.format(LocalDateTime.now());
-                        TestCase test = new TestCase(i, Checker.verdictMap.get(Checker.verdict),
+                        TestCase test = new TestCase(i, timeElapsed,
+                        							 Checker.verdictMap.get(Checker.verdict),
                                                      Checker.log,
                                                      Checker.inp,
                                                      Checker.out,
@@ -250,6 +257,8 @@ public class Checker
                     if(args.length < 2)
                         Checker.exitWithMessage("Missing testcase no. Format: reveal X");
                     int idx = Integer.parseInt(args[1]);
+                    if(idx > no_of_testcases)
+                    	Checker.exitWithMessage("Testcase not found.");
                     try
                     {
                         ObjectInputStream ois = new ObjectInputStream(new FileInputStream("Results.dat"));

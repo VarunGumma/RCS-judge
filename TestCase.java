@@ -4,6 +4,7 @@ import java.util.ArrayList;
 public class TestCase implements Serializable 
 {
     private final int testNo;
+    private final long execTime;
     private final String log;
     private final String verdict;
     private final ArrayList<String> inp;
@@ -12,7 +13,7 @@ public class TestCase implements Serializable
     private final String time;
     private static final long serialVersionUID = 1L;
 
-    TestCase(int testNo, String verdict, String log, ArrayList<String> inp, ArrayList<String> out, ArrayList<String> ans, String time)
+    TestCase(int testNo, long execTime, String verdict, String log, ArrayList<String> inp, ArrayList<String> out, ArrayList<String> ans, String time)
     {
         this.inp = inp;
         this.out = out;
@@ -21,23 +22,26 @@ public class TestCase implements Serializable
         this.testNo = testNo;
         this.verdict = verdict;
         this.time = time;
+        this.execTime = execTime;
     }
 
     void showResult()
     {
         if(this.testNo == 1)
             System.out.println("\n\t+--------------------------------------------+");
-        System.out.println("\t| testcase #" + this.testNo + " | verdict: " + this.verdict + "|");
+        System.out.println("\t| testcase #" + this.testNo + " | verdict: " + this.verdict + " |");
         System.out.println("\t+--------------------------------------------+");
     }
 
     @Override
     public String toString()
     {
+        double etime = ((double)execTime)/1000000;
         StringBuilder finalAns = new StringBuilder("\n");
         finalAns.append("---------------------------------------------------------------\n");
         finalAns.append("TESTCASE: ").append(this.testNo).append("\n");
         finalAns.append("JUDGED AT: ").append(this.time).append("\n");
+        finalAns.append("RUNTIME: ").append(etime).append(" ms\n");
         finalAns.append("VERDICT: ").append(this.verdict).append("\n");
 
         finalAns.append("\nINPUT:\n");
