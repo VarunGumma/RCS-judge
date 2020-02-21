@@ -162,18 +162,23 @@ public class Checker
 
                             //if process has already ended but killer is still running;
                             //interrupt the killer thread;
-                            while(p.isAlive())
+                            //but first allow the process to wrap up;
+                            if(p.isAlive())
                             {
-                            	//but first allow the process to wrap up;
                                 timer.interrupt();
-                                end = Instant.now();
+                                p.waitFor();
                             }
+                            end = Instant.now();
                         }
                         catch (IOException ie)
                         {
                             //if the process has been killer externally meanwhile, an exception is generated;
                             //generated exception indicates an TLE;
                             Checker.verdict = 2;
+                        }
+                        catch (InterruptedException inte)
+                        {
+                            //don't do anything;
                         }
                         finally
                         {
