@@ -16,6 +16,7 @@ public class Checker
     private static ArrayList<String> out = null;
     private static ArrayList<String> ans = null;
     private static HashMap<Integer, String> verdictMap = null;
+    private static HashMap<String, String> compileCmds = null;
 
     //new method to comapre if expected output is equal to received output;
     //in this method, appropriate log is set for the testcase;
@@ -76,6 +77,27 @@ public class Checker
                     Checker.verdictMap.put(1, ("\033[1;" + 32 + "m" + "Accepted           " + "\033[0m"));
                     Checker.verdictMap.put(2, ("\033[1;" + 33 + "m" + "Time Limit Exceeded" + "\033[0m"));
 
+                    Checker.compileCmds = new HashMap<>();
+                    Checker.compileCmds.put(".c", "gcc --std=c99 -lm ");
+                    Checker.compileCmds.put(".cpp", "g++ --std=c++14 ");
+
+                    //first compile it;
+                    String ext = args[1].substring(args[1].lastIndexOf("."), args[1].length());
+                   	String ccmd = Checker.compileCmds.get(ext) + args[1];
+                    String params[] = {"bash", "-c", ccmd};
+                    Process compiler = Runtime.getRuntime().exec(params);
+                    try
+                    {
+                    	compiler.waitFor();
+                    }
+                    catch(InterruptedException ie)
+                    {
+                		//don't print anything;
+                    }
+
+                    if(compiler.exitValue() != 0)
+                        Checker.exitWithMessage("\033[1;" + 31 + "m" + "Compilation Error!\n" + "\033[0m");
+
                     for (int i = 1; i <= no_of_testcases; i++)
                     {
                         String st;
@@ -91,12 +113,12 @@ public class Checker
                         BufferedReader bfra = null;
                         try
                         {
-                        		bfri = new BufferedReader(new FileReader("test_files/t" + i + ".txt"));
-                        		bfra = new BufferedReader(new FileReader("test_files/t" + i + "_o.txt"));
+                        	bfri = new BufferedReader(new FileReader("test_files/t" + i + ".txt"));
+                        	bfra = new BufferedReader(new FileReader("test_files/t" + i + "_o.txt"));
                         }
                         catch(IOException ie)
                         {
-                        		Checker.exitWithMessage("Unable to read necessary files");
+                        	Checker.exitWithMessage("Unable to read necessary files");
                         }
                         //fetch input for the given problem;
                         //don't include any stray newlines or spaces;
@@ -108,23 +130,6 @@ public class Checker
                         while ((st = bfra.readLine()) != null)
                             if (st.trim().length() > 0)
                                 Checker.ans.add(st.trim());
-
-                        //begin the sub-process;
-                        //first compile it;
-                        String compileCmd = (((args[1].charAt(args[1].length() - 1) == 'c') ? "gcc -lm " : "g++ -std=c++17 ") + args[1]);
-                        String params[] = {"bash", "-c", compileCmd};
-                        Process compiler = Runtime.getRuntime().exec(params);
-                        try
-                        {
-                        		compiler.waitFor();
-                        }
-                        catch(InterruptedException ie)
-                        {
-                    		    //don't print anything;
-                        }
-
-                        if(compiler.exitValue() != 0)
-                            Checker.exitWithMessage("\033[1;" + 31 + "m" + "Compilation Error!\n" + "\033[0m");
 
                         //if compilation is successful, run it;
                         Instant start = null, end = null;
@@ -227,7 +232,8 @@ public class Checker
                         long timeElapsed = Duration.between(start, end).toNanos();
                         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
                         String currTime = dtf.format(LocalDateTime.now());
-                        TestCase test = new TestCase(i, timeElapsed,
+                        TestCase test = new TestCase(i, 
+                        							 timeElapsed,
                         							 Checker.verdictMap.get(Checker.verdict),
                                                      Checker.log,
                                                      Checker.inp,
