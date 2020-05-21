@@ -7,7 +7,7 @@ public class TestCase implements Serializable
     private final int testNo;
     private final String time;
     private final long execTime;
-    private final String verdict;
+    public final String verdict;
     private final ArrayList<String> inp;
     private final ArrayList<String> out;
     private final ArrayList<String> ans;

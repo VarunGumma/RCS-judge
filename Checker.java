@@ -1,6 +1,16 @@
-import java.io.*;
-import java.util.ArrayList;
+//import java.io.*;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.FileNotFoundException;
 import java.util.HashMap;
+import java.util.ArrayList;
 import java.time.Instant;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -18,7 +28,7 @@ public class Checker
     private static HashMap<Integer, String> verdictMap = null;
     private static HashMap<String, String> compileCmds = null;
 
-    //new method to comapre if expected output is equal to received output;
+    //new method to compare if expected output is equal to received output;
     //in this method, appropriate log is set for the testcase;
     private static void compareIfEqual()
     {
@@ -46,6 +56,29 @@ public class Checker
     {
         System.out.println(s);
         System.exit(0);
+    }
+
+    public static ArrayList readFiles(String arg, int idx)
+    {
+        ArrayList<String> data = new ArrayList<String>();
+        try
+        {
+            String st;
+            String fname = arg.equals("input") ? ("test_files/t" + idx + ".txt") : ("test_files/t" + idx + "_o.txt");
+            BufferedReader reader = new BufferedReader(new FileReader(fname));
+            //fetch input for the given problem;
+            //don't include any stray newlines or spaces;
+            while ((st = reader.readLine()) != null)
+                if (st.trim().length() > 0)
+                    data.add(st.trim());
+            reader.close();
+        }
+        catch(IOException e)
+        {
+            Checker.exitWithMessage("Unable to fetch necessary files!");
+        }
+
+        return data;
     }
 
     //main function:
@@ -105,39 +138,17 @@ public class Checker
                         //verdict -1 indicates that current testcase is still under judgement;
                         Checker.log = "Ok";
                         Checker.verdict = -1;
-                        Checker.inp = new ArrayList<String>();
+                        Checker.inp = Checker.readFiles("input", i);
+                        Checker.ans = Checker.readFiles("answer", i);
                         Checker.out = new ArrayList<String>();
-                        Checker.ans = new ArrayList<String>();
-
-                        BufferedReader bfri = null;
-                        BufferedReader bfra = null;
-                        try
-                        {
-                        	bfri = new BufferedReader(new FileReader("test_files/t" + i + ".txt"));
-                        	bfra = new BufferedReader(new FileReader("test_files/t" + i + "_o.txt"));
-                        }
-                        catch(IOException ie)
-                        {
-                        	Checker.exitWithMessage("Unable to read necessary files");
-                        }
-                        //fetch input for the given problem;
-                        //don't include any stray newlines or spaces;
-                        while ((st = bfri.readLine()) != null)
-                            if (st.trim().length() > 0)
-                                Checker.inp.add(st.trim());
-                        //fetch required answer for the problem;
-                        //don't include any stray newlines or spaces;
-                        while ((st = bfra.readLine()) != null)
-                            if (st.trim().length() > 0)
-                                Checker.ans.add(st.trim());
 
                         //if compilation is successful, run it;
-                        Instant start = null, end = null;
+                        Instant start = null;
+                        Instant end = null;
                         Process p = null;
                         try
                         {
                             p = new ProcessBuilder().command("./a.out").start();
-                            start = Instant.now();
                         }
                         catch (IOException ie)
                         {
@@ -153,6 +164,7 @@ public class Checker
 
                         try
                         {
+                            start = Instant.now();
                             //provide input to the subprocess;
                             for (String s : Checker.inp)
                             {
@@ -164,6 +176,7 @@ public class Checker
                             while ((st = bfro.readLine()) != null)
                                 if (st.trim().length() > 0)
                                     Checker.out.add(st.trim());
+                            bfro.close();
 
                             //if process has already ended but killer is still running;
                             //interrupt the killer thread;
@@ -200,11 +213,6 @@ public class Checker
                             {
                                 //don't report anything;
                             }
-
-                            //close all streams;
-                            bfri.close();
-                            bfra.close();
-                            bfro.close();
                         }
 
                         //verify output;
@@ -242,8 +250,6 @@ public class Checker
                                                      currTime);
                         test.showResult();
                         pack.add(test);
-                        if(compiler.isAlive())
-                        	compiler.destroyForcibly();
                         System.gc();
                     }
                     //dump all testcases into a file for future reference;
@@ -279,11 +285,11 @@ public class Checker
                     }
                     catch (FileNotFoundException fnfe)
                     {
-                        System.out.println("Judge atleast once before revealing");
+                        Checker.exitWithMessage("Judge atleast once before revealing");
                     }
                     catch (IOException | ClassNotFoundException | ClassCastException ge)
                     {
-                        ge.printStackTrace();
+                        Checker.exitWithMessage("Unknown Exception");
                     }
                     break;
 
