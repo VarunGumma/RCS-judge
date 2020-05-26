@@ -148,10 +148,11 @@ public class Checker
                         Process p = null;
                         try
                         {
-                            p = new ProcessBuilder().command("./a.out").start();
+                            p = Runtime.getRuntime().exec("./a.out");
                         }
                         catch (IOException ie)
                         {
+                        	ie.printStackTrace();
                             Checker.exitWithMessage("No executable found. Compile the source code first.");
                         }
                         //get the I/O streams of the subprocess;
