@@ -7,7 +7,6 @@ public class TimerThread extends Thread
     {
         this.process = p;
         this.time_limit = time_limit;
-        this.start();
     }
 
     public void run()

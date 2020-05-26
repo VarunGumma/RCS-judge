@@ -152,7 +152,6 @@ public class Checker
                         }
                         catch (IOException ie)
                         {
-                        	ie.printStackTrace();
                             Checker.exitWithMessage("No executable found. Compile the source code first.");
                         }
                         //get the I/O streams of the subprocess;
@@ -160,8 +159,8 @@ public class Checker
                         PrintWriter pw = new PrintWriter(p.getOutputStream());
                         BufferedReader bfro = new BufferedReader(new InputStreamReader(p.getInputStream()));
                         //begin killer thread to check for timelimit;
-                        //this constructor internally calls start;
                         TimerThread timer = new TimerThread(p, 2500);
+                        timer.start();
 
                         try
                         {
