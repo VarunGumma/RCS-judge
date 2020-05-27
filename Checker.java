@@ -228,7 +228,7 @@ public class Checker
                 if(compiler.exitValue() != 0)
                     Checker.exitWithMessage("\033[1;" + 31 + "m" + "Compilation Error!\n" + "\033[0m");
 
-                for (int i = 1; i <= no_of_testcases; i++)
+                for (int testcaseno = 1; testcaseno <= no_of_testcases; testcaseno++)
                 {
                     String st;
                     /* initialize variables for TestCase class;
@@ -237,8 +237,8 @@ public class Checker
                     Checker.log = "Ok";
                     Checker.verdict = -1;
                     Checker.process = null;
-                    Checker.inp = Checker.read("input", i);
-                    Checker.ans = Checker.read("answer", i);
+                    Checker.inp = Checker.read("input", testcaseno);
+                    Checker.ans = Checker.read("answer", testcaseno);
                     Checker.out = new ArrayList<String>();
 
                     /*if compilation is successful, run it*/
@@ -260,12 +260,13 @@ public class Checker
                     timer.schedule(new TimerTask(){
                     	@Override
                     	public void run(){
-                    		if(Checker.process.isAlive()){
+                    		if(Checker.process.isAlive())
+                            {
                     			Checker.process.destroyForcibly();
                     			Checker.verdict = 2;
                     		}
                     	}
-                    }, 2100);
+                    }, 2000);
 
                     try
                     {
@@ -336,7 +337,7 @@ public class Checker
                     long timeElapsed = Duration.between(start, end).toNanos();
                     DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
                     String currTime = dtf.format(LocalDateTime.now());
-                    TestCase test = new TestCase(i, 
+                    TestCase test = new TestCase(testcaseno, 
                     							 timeElapsed,
                     							 Checker.verdictMap.get(Checker.verdict),
                                                  Checker.log,

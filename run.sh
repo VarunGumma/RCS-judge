@@ -18,5 +18,5 @@ then echo "Executable permissions granted. JAR file ready."
 fi
 
 rm *.class
-echo "All temp file removed."
+echo "All temp files removed."
 set +e
