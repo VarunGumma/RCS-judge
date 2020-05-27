@@ -1,4 +1,3 @@
-//import java.io.*;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -9,24 +8,30 @@ import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.FileNotFoundException;
+
+import java.util.Timer;
 import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.TimerTask;
+
 import java.time.Instant;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+
 public class Checker
 {
     //this program works best for fixed output programs;
-    private static String log = null;
-    protected static int verdict = -1;
+    private static int verdict;
+    private static String log;
+    private static Process process;
+    private static ArrayList<String> inp;
+    private static ArrayList<String> out;
+    private static ArrayList<String> ans;
     private static final String pass = "jarvis";
-    private static ArrayList<String> inp = null;
-    private static ArrayList<String> out = null;
-    private static ArrayList<String> ans = null;
-    private static HashMap<Integer, String> verdictMap = null;
-    private static HashMap<String, String> compileCmds = null;
+    private static HashMap<Integer, String> verdictMap;
+    private static HashMap<String, String> compileCmds;
 
     //new method to compare if expected output is equal to received output;
     //in this method, appropriate log is set for the testcase;
@@ -58,7 +63,7 @@ public class Checker
         System.exit(0);
     }
 
-    public static ArrayList readFiles(String arg, int idx)
+    public static ArrayList read(String arg, int idx)
     {
         ArrayList<String> data = new ArrayList<String>();
         try
@@ -69,8 +74,11 @@ public class Checker
             //fetch input for the given problem;
             //don't include any stray newlines or spaces;
             while ((st = reader.readLine()) != null)
-                if (st.trim().length() > 0)
-                    data.add(st.trim());
+            {
+            	st = st.trim();
+                if (st.length() > 0)
+                    data.add(st);
+            }
             reader.close();
         }
         catch(IOException e)
@@ -138,17 +146,16 @@ public class Checker
                         //verdict -1 indicates that current testcase is still under judgement;
                         Checker.log = "Ok";
                         Checker.verdict = -1;
-                        Checker.inp = Checker.readFiles("input", i);
-                        Checker.ans = Checker.readFiles("answer", i);
+                        Checker.process = null;
+                        Checker.inp = Checker.read("input", i);
+                        Checker.ans = Checker.read("answer", i);
                         Checker.out = new ArrayList<String>();
 
                         //if compilation is successful, run it;
-                        Instant start = null;
-                        Instant end = null;
-                        Process p = null;
+                        Instant start = null, end = null;
                         try
                         {
-                            p = Runtime.getRuntime().exec("./a.out");
+                            Checker.process = Runtime.getRuntime().exec("./a.out");
                         }
                         catch (IOException ie)
                         {
@@ -156,11 +163,18 @@ public class Checker
                         }
                         //get the I/O streams of the subprocess;
                         //and construct wrapper classes around them of ease I/O;
-                        PrintWriter pw = new PrintWriter(p.getOutputStream());
-                        BufferedReader bfro = new BufferedReader(new InputStreamReader(p.getInputStream()));
-                        //begin killer thread to check for timelimit;
-                        TimerThread timer = new TimerThread(p, 2500);
-                        timer.start();
+                        PrintWriter pw = new PrintWriter(Checker.process.getOutputStream());
+                        BufferedReader bfro = new BufferedReader(new InputStreamReader(Checker.process.getInputStream()));
+                        Timer timer = new Timer("terminater");
+                        timer.schedule(new TimerTask(){
+                        	@Override
+                        	public void run(){
+                        		if(Checker.process.isAlive()){
+                        			Checker.process.destroyForcibly();
+                        			Checker.verdict = 2;
+                        		}
+                        	}
+                        }, 2100);
 
                         try
                         {
@@ -174,23 +188,19 @@ public class Checker
                             //read the output from the subprocess;
                             //don't include stray spaces or newlines;
                             while ((st = bfro.readLine()) != null)
-                                if (st.trim().length() > 0)
-                                    Checker.out.add(st.trim());
-                            bfro.close();
-
-                            //if process has already ended but killer is still running;
-                            //interrupt the killer thread;
-                            //but first allow the process to wrap up;
-                            if(p.isAlive())
                             {
-                                timer.interrupt();
-                                p.waitFor();
+                            	st = st.trim();
+                                if (st.length() > 0)
+                                    Checker.out.add(st);
                             }
-                            end = Instant.now();
+                            //as no exception has been generated till now;
+                            //wait for the process;
+                            //As timer is started, if a TLE occurs, executing process is killed and the main thread can resume again;
+							Checker.process.waitFor();
                         }
                         catch (IOException ie)
                         {
-                            //if the process has been killer externally meanwhile, an exception is generated;
+                            //if the process has been killed externally meanwhile, an exception is generated;
                             //generated exception indicates an TLE;
                             Checker.verdict = 2;
                         }
@@ -200,19 +210,10 @@ public class Checker
                         }
                         finally
                         {
-                            //join running threads;
-                            try
-                            {
-                                if(!timer.isInterrupted())
-                                {
-                                    timer.join();
-                                    end = Instant.now();
-                                }
-                            }
-                            catch(InterruptedException ie)
-                            {
-                                //don't report anything;
-                            }
+                        	end = Instant.now();
+                        	timer.cancel();
+                        	timer.purge();
+                        	bfro.close();
                         }
 
                         //verify output;
@@ -222,7 +223,7 @@ public class Checker
                             Checker.log = "TLE";
                         else
                         {
-                            if(p.exitValue() != 0)
+                            if(Checker.process.exitValue() != 0)
                             {
                                 Checker.verdict = 3;
                                 Checker.log = "Runtime error";
@@ -250,6 +251,7 @@ public class Checker
                                                      currTime);
                         test.showResult();
                         pack.add(test);
+                        //run garbage cleaner once;
                         System.gc();
                     }
                     //dump all testcases into a file for future reference;
