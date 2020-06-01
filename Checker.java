@@ -1,8 +1,10 @@
 /*import statements*/
 import java.io.FileReader;
+import java.io.InputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Serializable;
+import java.io.OutputStream;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -139,7 +141,7 @@ public class Checker
         System.exit(0);
     }
 
-    public static ArrayList read(String arg, int idx)
+    private static ArrayList read(String arg, int idx)
     {
         ArrayList<String> data = new ArrayList<String>();
         try
@@ -164,6 +166,38 @@ public class Checker
         }
 
         return data;
+    }
+
+    private static ArrayList read(InputStream is) throws IOException
+    {
+    	String st;
+        ArrayList<String> data = new ArrayList<String>();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+        /* fetch output of program;
+         * don't include any stray newlines or spaces;
+         */
+        while ((st = reader.readLine()) != null)
+        {
+        	st = st.trim();
+            if (st.length() > 0)
+                data.add(st);
+        }
+        reader.close();
+        return data;
+    }
+
+    private static void write(OutputStream os, ArrayList<String> arrlist)
+    {
+    	PrintWriter pw = new PrintWriter(os);
+    	/* write the required input to the program
+    	 * flush the stream after every line is written;
+    	 */
+    	for(String st : arrlist)
+    	{
+    		pw.println(st);
+    		pw.flush();
+    	}
+    	return;
     }
 
     /*main function:*/
@@ -209,7 +243,7 @@ public class Checker
 
                 Checker.compileCmds = new HashMap<>();
                 Checker.compileCmds.put(".c", "gcc --std=c99 -lm ");
-                Checker.compileCmds.put(".cpp", "g++ --std=c++14 ");
+                Checker.compileCmds.put(".cpp", "g++ --std=c++17 ");
 
                 /*first compile it*/
                 String ext = args[1].substring(args[1].lastIndexOf("."), args[1].length());
@@ -239,7 +273,6 @@ public class Checker
                     Checker.process = null;
                     Checker.inp = Checker.read("input", testcaseno);
                     Checker.ans = Checker.read("answer", testcaseno);
-                    Checker.out = new ArrayList<String>();
 
                     /*if compilation is successful, run it*/
                     Instant start = null, end = null;
@@ -255,7 +288,6 @@ public class Checker
                      * and construct wrapper classes around them of ease I/O;
                      */
                     PrintWriter pw = new PrintWriter(Checker.process.getOutputStream());
-                    BufferedReader bfro = new BufferedReader(new InputStreamReader(Checker.process.getInputStream()));
                     Timer timer = new Timer("terminater");
                     timer.schedule(new TimerTask(){
                     	@Override
@@ -266,26 +298,17 @@ public class Checker
                     			Checker.verdict = 2;
                     		}
                     	}
-                    }, 2000);
+                    }, 2050);
 
                     try
                     {
                         start = Instant.now();
                         /*provide input to the subprocess*/
-                        for (String s : Checker.inp)
-                        {
-                            pw.println(s);
-                            pw.flush();
-                        }
+                        Checker.write(Checker.process.getOutputStream(), Checker.inp);
                         /* read the output from the subprocess;
                          * don't include stray spaces or newlines;
                          */
-                        while ((st = bfro.readLine()) != null)
-                        {
-                        	st = st.trim();
-                            if (st.length() > 0)
-                                Checker.out.add(st);
-                        }
+                        Checker.out = Checker.read(Checker.process.getInputStream());
                         /* as no exception has been generated till now;
                          * wait for the process;
                          * As timer is started, if a TLE occurs, executing process is killed and the main thread can resume again;
@@ -308,7 +331,6 @@ public class Checker
                     	end = Instant.now();
                     	timer.cancel();
                     	timer.purge();
-                    	bfro.close();
                     }
 
                     /* verify output;
