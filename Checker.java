@@ -112,8 +112,9 @@ public class Checker
 	/* new method to compare if expected output is equal to received output;
 	 * in this method, appropriate log is set for the testcase;
 	 */
-	private static void compareIfEqual()
+	private static String getLog()
 	{
+		String tempLog = "OK";
 		int os = Checker.out.size();
 		int as = Checker.ans.size();
 		/* full answer is not found;
@@ -121,18 +122,20 @@ public class Checker
 		 * report first mismatch instance;
 		 */
 		if(os == 0)
-			Checker.log = "<no output>";
+			tempLog = "<no output>";
 		else if(os < as)
-			Checker.log = "Unexpected EOF. Expected " + as + " lines, found " + os + " lines";
+			tempLog = "Unexpected EOF. Expected " + as + " lines, found " + os + " lines";
 		else if(os > as)
-			Checker.log = "Extraneous output printed";
+			tempLog = "Extraneous output printed";
 		else
 			for(int i = 0; i < os; i++)
 				if(!ans.get(i).equals(out.get(i)))
 				{
-					Checker.log = ("Wrong answer on line number " + (i+1));
+					tempLog = ("Wrong answer on line number " + (i+1));
 					break;
 				}
+
+		return tempLog;
 	}
 
 	private static void exitWithMessage(String s)
@@ -220,7 +223,7 @@ public class Checker
 					/* invoke a console object's readPassword method to read the password for the judge;
 					 * the password in this case will not be visible;
 					 */
-					System.out.print("\nEnter Password (" + tries + " tries left): ");
+					System.out.print("\nEnter Password (" + tries + ((tries == 1) ? " try " : " tries ") + "left): ");
 					inp_pass = new String(System.console().readPassword());
 					if(inp_pass.equals(Checker.pass))
 						break;
@@ -264,11 +267,9 @@ public class Checker
 
 				for (int testcaseno = 1; testcaseno <= no_of_testcases; testcaseno++)
 				{
-					String st;
 					/* initialize variables for TestCase class;
 					 * verdict -1 indicates that current testcase is still under judgement;
 					 */
-					Checker.log = "Ok";
 					Checker.verdict = -1;
 					Checker.process = null;
 					Checker.inp = Checker.read("input", testcaseno);
@@ -348,8 +349,8 @@ public class Checker
 						}
 						else
 						{
-							Checker.compareIfEqual();
-							Checker.verdict = (Checker.log.equals("Ok") ? 1 : 0);
+							Checker.log = Checker.getLog();
+							Checker.verdict = (Checker.log.equals("OK") ? 1 : 0);
 						}
 					}
 
