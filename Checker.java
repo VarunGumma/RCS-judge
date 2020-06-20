@@ -360,14 +360,7 @@ public class Checker
 					long timeElapsed = Duration.between(start, end).toNanos();
 					DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
 					String currTime = dtf.format(LocalDateTime.now());
-					TestCase test = new TestCase(testcaseno, 
-												 timeElapsed,
-												 Checker.verdictMap.get(Checker.verdict),
-												 Checker.log,
-												 Checker.inp,
-												 Checker.out,
-												 Checker.ans,
-												 currTime);
+					TestCase test = new TestCase(testcaseno, timeElapsed, Checker.verdictMap.get(Checker.verdict), Checker.log, Checker.inp, Checker.out, Checker.ans, currTime);
 
 					/*add testcase to the pack after displaying partial result*/
 					test.showResult();
