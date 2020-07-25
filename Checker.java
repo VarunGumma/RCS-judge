@@ -144,30 +144,22 @@ public class Checker
 		System.exit(0);
 	}
 
-	private static ArrayList read(String arg, int idx)
+	private static ArrayList read(String arg, int idx) throws IOException
 	{
+		String st;
 		ArrayList<String> data = new ArrayList<String>();
-		try
+		String fname = arg.equals("input") ? ("test_files/t" + idx + ".txt") : ("test_files/t" + idx + "_o.txt");
+		BufferedReader reader = new BufferedReader(new FileReader(fname));
+		/* fetch input for the given problem;
+		 * don't include any stray newlines or spaces;
+		 */
+		while ((st = reader.readLine()) != null)
 		{
-			String st;
-			String fname = arg.equals("input") ? ("test_files/t" + idx + ".txt") : ("test_files/t" + idx + "_o.txt");
-			BufferedReader reader = new BufferedReader(new FileReader(fname));
-			/* fetch input for the given problem;
-			 * don't include any stray newlines or spaces;
-			 */
-			while ((st = reader.readLine()) != null)
-			{
-				st = st.trim();
-				if (st.length() > 0)
-					data.add(st);
-			}
-			reader.close();
+			st = st.trim();
+			if (st.length() > 0)
+				data.add(st);
 		}
-		catch(IOException e)
-		{
-			Checker.exitWithMessage("Unable to fetch necessary files!");
-		}
-
+		reader.close();
 		return data;
 	}
 
@@ -272,8 +264,15 @@ public class Checker
 					 */
 					Checker.verdict = -1;
 					Checker.process = null;
-					Checker.inp = Checker.read("input", testcaseno);
-					Checker.ans = Checker.read("answer", testcaseno);
+					try
+					{
+						Checker.inp = Checker.read("input", testcaseno);
+						Checker.ans = Checker.read("answer", testcaseno);
+					}
+					catch(IOException ie)
+					{
+						Checker.exitWithMessage("Unable to read required files.");
+					}
 
 					/*if compilation is successful, run it*/
 					Instant start = null, end = null;
@@ -422,7 +421,6 @@ public class Checker
 				System.out.println("Usage: java -jar RCS.jar [judge xxx | reveal X | clean]");
 				break;
 		}
-
 	}
 }
 
