@@ -1,4 +1,4 @@
-/*import statements*/
+/* this program works best for fixed output problems */
 import java.io.FileReader;
 import java.io.InputStream;
 import java.io.IOException;
@@ -98,7 +98,6 @@ class TestCase implements Serializable
 
 public class Checker
 {
-	/*this program works best for fixed output programs*/
 	private static int verdict;
 	private static String log;
 	private static Process process;
@@ -109,18 +108,12 @@ public class Checker
 	private static HashMap<Integer, String> verdictMap;
 	private static HashMap<String, String> compileCmds;
 
-	/* new method to compare if expected output is equal to received output;
-	 * in this method, appropriate log is set for the testcase;
-	 */
+
 	private static String getLog()
 	{
 		String tempLog = "OK";
 		int os = Checker.out.size();
 		int as = Checker.ans.size();
-		/* full answer is not found;
-		 * else a full answer is found, but there is a mismatch;
-		 * report first mismatch instance;
-		 */
 		if(os == 0)
 			tempLog = "<no output>";
 		else if(os < as)
@@ -138,21 +131,21 @@ public class Checker
 		return tempLog;
 	}
 
+
 	private static void exitWithMessage(String s)
 	{
 		System.out.println(s);
 		System.exit(0);
 	}
 
+
 	private static ArrayList read(String arg, int idx) throws IOException
 	{
-		String st;
+		String st, fname = ("test_files/t" + idx);
 		ArrayList<String> data = new ArrayList<String>();
-		String fname = arg.equals("input") ? ("test_files/t" + idx + ".txt") : ("test_files/t" + idx + "_o.txt");
+        fname += ((arg.equals("input") ? "" : "_o") + ".txt");
 		BufferedReader reader = new BufferedReader(new FileReader(fname));
-		/* fetch input for the given problem;
-		 * don't include any stray newlines or spaces;
-		 */
+
 		while ((st = reader.readLine()) != null)
 		{
 			st = st.trim();
@@ -162,15 +155,14 @@ public class Checker
 		reader.close();
 		return data;
 	}
+
 
 	private static ArrayList read(InputStream is) throws IOException
 	{
 		String st;
 		ArrayList<String> data = new ArrayList<String>();
 		BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-		/* fetch output of program;
-		 * don't include any stray newlines or spaces;
-		 */
+
 		while ((st = reader.readLine()) != null)
 		{
 			st = st.trim();
@@ -181,12 +173,10 @@ public class Checker
 		return data;
 	}
 
+
 	private static void write(OutputStream os, ArrayList<String> arrlist)
 	{
 		PrintWriter pw = new PrintWriter(os);
-		/* write the required input to the program
-		 * flush the stream after every line is written;
-		 */
 		for(String st : arrlist)
 		{
 			pw.println(st);
@@ -195,15 +185,13 @@ public class Checker
 		return;
 	}
 
-	/*main function:*/
+
 	public static void main (String[] args) throws IOException
 	{
 		int score = 0, no_of_testcases = 3, tries = 3;
-		/*display error message if the number of arguments are not adequate*/
 		if(args.length < 1 || args.length > 2)
 			Checker.exitWithMessage("Usage: java -jar RCS.jar [judge xxx | reveal X | clean]");
 
-		/*verify the password*/
 		switch (args[0])
 		{
 			case "judge":
@@ -212,9 +200,6 @@ public class Checker
 					Checker.exitWithMessage("Missing source code filename. Format: judge xxx");
 				while(tries > 0)
 				{   
-					/* invoke a console object's readPassword method to read the password for the judge;
-					 * the password in this case will not be visible;
-					 */
 					System.out.print("\nEnter Password (" + tries + ((tries == 1) ? " try " : " tries ") + "left): ");
 					inp_pass = new String(System.console().readPassword());
 					if(inp_pass.equals(Checker.pass))
@@ -229,7 +214,6 @@ public class Checker
 				}
 
 				ArrayList<TestCase> pack = new ArrayList<TestCase>();
-				/*keep a verdict map to have a track of the color-coded output along with a verdict digit [0-2] for simplicity;*/
 				Checker.verdictMap = new HashMap<>();
 				Checker.verdictMap.put(0, ("\033[1;" + 31 + "m" + "Wrong Answer       " + "\033[0m"));
 				Checker.verdictMap.put(3, ("\033[1;" + 31 + "m" + "Runtime Error      " + "\033[0m"));
@@ -240,7 +224,6 @@ public class Checker
 				Checker.compileCmds.put(".c", "gcc --std=c99 -lm ");
 				Checker.compileCmds.put(".cpp", "g++ --std=c++17 ");
 
-				/*first compile it*/
 				String ext = args[1].substring(args[1].lastIndexOf("."), args[1].length());
 				String ccmd = Checker.compileCmds.get(ext) + args[1];
 				String params[] = {"bash", "-c", ccmd};
@@ -259,9 +242,6 @@ public class Checker
 
 				for (int testcaseno = 1; testcaseno <= no_of_testcases; testcaseno++)
 				{
-					/* initialize variables for TestCase class;
-					 * verdict -1 indicates that current testcase is still under judgement;
-					 */
 					Checker.verdict = -1;
 					Checker.process = null;
 					try
@@ -274,7 +254,6 @@ public class Checker
 						Checker.exitWithMessage("Unable to read required files.");
 					}
 
-					/*if compilation is successful, run it*/
 					Instant start = null, end = null;
 					try
 					{
@@ -284,9 +263,7 @@ public class Checker
 					{
 						Checker.exitWithMessage("No executable found. Compile the source code first.");
 					}
-					/* get the I/O streams of the subprocess;
-					 * and construct wrapper classes around them of ease I/O;
-					 */
+
 					PrintWriter pw = new PrintWriter(Checker.process.getOutputStream());
 					Timer timer = new Timer("terminater");
 					timer.schedule(new TimerTask(){
@@ -303,23 +280,12 @@ public class Checker
 					try
 					{
 						start = Instant.now();
-						/*provide input to the subprocess*/
 						Checker.write(Checker.process.getOutputStream(), Checker.inp);
-						/* read the output from the subprocess;
-						 * don't include stray spaces or newlines;
-						 */
 						Checker.out = Checker.read(Checker.process.getInputStream());
-						/* as no exception has been generated till now;
-						 * wait for the process;
-						 * As timer is started, if a TLE occurs, executing process is killed and the main thread can resume again;
-						 */
 						Checker.process.waitFor();
 					}
 					catch (IOException ie)
 					{
-						/* if the process has been killed externally meanwhile, an exception is generated;
-						 * generated exception indicates an TLE;
-						 */
 						Checker.verdict = 2;
 					}
 					catch (InterruptedException inte)
@@ -333,10 +299,6 @@ public class Checker
 						timer.purge();
 					}
 
-					/* verify output;
-					 * if already TLE has occured, set log as "TLE";
-					 * else check the output;
-					 */
 					if(Checker.verdict == 2)
 						Checker.log = "TLE";
 					else
@@ -355,23 +317,20 @@ public class Checker
 
 					if (Checker.verdict == 1)
 						score++;
-					/*save the testcase*/
 					long timeElapsed = Duration.between(start, end).toNanos();
 					DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
 					String currTime = dtf.format(LocalDateTime.now());
 					TestCase test = new TestCase(testcaseno, timeElapsed, Checker.verdictMap.get(Checker.verdict), Checker.log, Checker.inp, Checker.out, Checker.ans, currTime);
 
-					/*add testcase to the pack after displaying partial result*/
 					test.showResult();
 					pack.add(test);
-					/*run garbage cleaner once;*/
 					System.gc();
 				}
-				/*dump all testcases into a file for future reference;*/
+
 				ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("Results.dat"));
 				oos.writeObject(pack);
 				oos.close();
-				/*output final score along with WELL DONE message;*/
+
 				System.out.println("\n\t\t        +----------------+");
 				System.out.print("\t\t\t| Final Score: " + score + " |");
 				System.out.println("\n\t\t        +----------------+");
@@ -385,7 +344,6 @@ public class Checker
 				break;
 
 			case "reveal":
-				/*to reveal a particular testcase*/;
 				if(args.length < 2)
 					Checker.exitWithMessage("Missing testcase no. Format: reveal X");
 				int idx = Integer.parseInt(args[1]);
@@ -409,7 +367,6 @@ public class Checker
 				break;
 
 			case "clean":
-				/*clean all files related to judge and the coder's executable file;*/
 				String[] cmd = {"rm Results.dat", "rm -rf test_files", "rm RCS.jar", "rm a.out"};
 				for (String s : cmd)
 					Runtime.getRuntime().exec(s);
@@ -417,7 +374,6 @@ public class Checker
 				break;
 
 			default:
-				/*if random cmd argument is found;*/
 				System.out.println("Usage: java -jar RCS.jar [judge xxx | reveal X | clean]");
 				break;
 		}

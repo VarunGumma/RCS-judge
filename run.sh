@@ -9,7 +9,7 @@ fi
 
 jar cvfm RCS.jar MANIFEST.MF *.class
 if [ $? -eq 0 ]
-then echo "Added Manifest successfully."
+then echo "Added Manifest and testcases successfully."
 fi
 
 chmod +x RCS.jar
