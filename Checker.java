@@ -143,7 +143,7 @@ public class Checker
 	{
 		String st, fname = ("test_files/t" + idx);
 		ArrayList<String> data = new ArrayList<String>();
-        fname += ((arg.equals("input") ? "" : "_o") + ".txt");
+        	fname += ((arg.equals("input") ? "" : "_o") + ".txt");
 		BufferedReader reader = new BufferedReader(new FileReader(fname));
 
 		while ((st = reader.readLine()) != null)
